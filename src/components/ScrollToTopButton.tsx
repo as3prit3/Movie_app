@@ -35,7 +35,7 @@ export default function ScrollToTopButton() {
           exit={{ opacity: 0, scale: 0.8, y: 20 }}
           transition={{ duration: 0.3 }}
           className="
-            fixed bottom-6 right-6 z-50
+            hidden lg:flex fixed bottom-6 right-6 z-50 items-center justify-center
             bg-white/10 backdrop-blur-md
             border border-white/10
             p-3 rounded-full

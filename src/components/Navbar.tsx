@@ -149,12 +149,14 @@ export default function Navbar() {
   };
 
   const navIconClass = "h-5 w-5";
-  const mobileLinkClass = (active: boolean) =>
+  const mobileLinkClass = (active: boolean, dimWhenSearchOpen = false) =>
     [
       "flex flex-1 flex-col items-center justify-center gap-1 rounded-2xl py-2 text-[11px] font-medium transition-all duration-200",
       active
         ? "bg-white/10 text-cyan-400 shadow-[0_0_0_1px_rgba(34,211,238,0.18),0_10px_30px_rgba(0,0,0,0.25)]"
-        : "text-white/70 hover:bg-white/10 hover:text-cyan-400 hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.25)]",
+        : dimWhenSearchOpen
+          ? "text-white/55"
+          : "text-white/70 hover:bg-white/10 hover:text-cyan-400 hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.25)]",
     ].join(" ");
 
   return (
@@ -232,7 +234,7 @@ export default function Navbar() {
         {mobileSearchOpen && (
           <div
             ref={mobileSearchRef}
-            className="mb-3 rounded-3xl border border-white/10 bg-black/65 p-3 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-3xl"
+            className="mb-1 rounded-3xl border border-white/10 bg-black/65 p-3 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-3xl"
           >
             <form onSubmit={handleSearch} className="relative">
               <Input
@@ -244,7 +246,7 @@ export default function Navbar() {
               />
 
               {showDropdown && suggestions.length > 0 && (
-                <div className="absolute bottom-full left-0 mb-3 max-h-72 w-full overflow-auto rounded-2xl border border-white/10 bg-black/90 shadow-2xl backdrop-blur-xl">
+                <div className="absolute bottom-full left-0 mb-4 max-h-72 w-full overflow-auto rounded-2xl border border-white/10 bg-black/90 shadow-2xl backdrop-blur-xl">
                   {suggestions.map((item) => (
                     <Link
                       key={`${item.media_type}-${item.id}`}
@@ -258,7 +260,7 @@ export default function Navbar() {
                           className="h-16 w-12 rounded object-cover"
                         />
                         <div className="min-w-0 flex-1">
-                          <div className="truncate text-sm font-semibold leading-tight">
+                          <div className="truncate text-sm font-semibold leading-tight text-white">
                             {item.title || item.name}
                           </div>
                           <div className="mt-1 text-xs text-white/55">
@@ -269,6 +271,11 @@ export default function Navbar() {
                             <span className="text-cyan-500">★</span>
                             <span>{item.vote_average.toFixed(1)}</span>
                           </div>
+                          {getGenres(item)?.length ? (
+                            <div className="mt-1 truncate text-xs text-white/45">
+                              {getGenres(item)?.join(" • ")}
+                            </div>
+                          ) : null}
                         </div>
                       </div>
                     </Link>
@@ -279,8 +286,8 @@ export default function Navbar() {
           </div>
         )}
 
-        <div className="mx-auto flex max-w-md items-center justify-between rounded-[1.75rem] border border-white/10 bg-black/65 px-3 py-2 text-white shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-3xl">
-          <Link to="/" className={mobileLinkClass(location.pathname === "/")} aria-current={location.pathname === "/" ? "page" : undefined}>
+        <div className="mx-auto flex max-w-[80%] items-center justify-between rounded-[1.75rem] border border-white/10 bg-black/65 px-3 py-2 text-white shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-3xl">
+          <Link to="/" className={mobileLinkClass(location.pathname === "/" && !mobileSearchOpen, mobileSearchOpen)} aria-current={location.pathname === "/" && !mobileSearchOpen ? "page" : undefined}>
             <svg className={navIconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M3 10.5 12 3l9 7.5" />
               <path d="M5 9.5V21h14V9.5" />
@@ -288,7 +295,7 @@ export default function Navbar() {
             <span>Home</span>
           </Link>
 
-          <Link to="/movies" className={mobileLinkClass(location.pathname.startsWith("/movies"))} aria-current={location.pathname.startsWith("/movies") ? "page" : undefined}>
+          <Link to="/movies" className={mobileLinkClass(location.pathname.startsWith("/movies") && !mobileSearchOpen, mobileSearchOpen)} aria-current={location.pathname.startsWith("/movies") && !mobileSearchOpen ? "page" : undefined}>
             <svg className={navIconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M4 5h16v14H4z" />
               <path d="M8 5v14" />
@@ -297,6 +304,14 @@ export default function Navbar() {
             <span>Movies</span>
           </Link>
 
+          <Link to="/tv" className={mobileLinkClass(location.pathname.startsWith("/tv") && !mobileSearchOpen, mobileSearchOpen)} aria-current={location.pathname.startsWith("/tv") && !mobileSearchOpen ? "page" : undefined}>
+            <svg className={navIconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M4 6h16v12H4z" />
+              <path d="m9 10 5 2-5 2z" />
+            </svg>
+            <span>TV</span>
+          </Link>
+          
           <button
             type="button"
             onClick={() => setMobileSearchOpen((prev) => !prev)}
@@ -310,26 +325,6 @@ export default function Navbar() {
             <span>Search</span>
           </button>
 
-          <Link to="/tv" className={mobileLinkClass(location.pathname.startsWith("/tv"))} aria-current={location.pathname.startsWith("/tv") ? "page" : undefined}>
-            <svg className={navIconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M4 6h16v12H4z" />
-              <path d="m9 10 5 2-5 2z" />
-            </svg>
-            <span>TV</span>
-          </Link>
-
-          <button
-            type="button"
-            onClick={() => setMobileSearchOpen((prev) => !prev)}
-            className="flex flex-1 flex-col items-center justify-center gap-1 rounded-2xl py-2 text-[11px] font-medium text-white/70 transition hover:bg-white/8 hover:text-cyan-500"
-          >
-            <svg className={navIconClass} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M4 7h16" />
-              <path d="M4 12h16" />
-              <path d="M4 17h16" />
-            </svg>
-            <span>Menu</span>
-          </button>
         </div>
       </div>
     </header>
